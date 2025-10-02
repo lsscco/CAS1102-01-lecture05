@@ -5,30 +5,33 @@
 #include "third_party/stb/stb_image.h"
 
 void decode_steganography(int image_data[], int data_size, std::string key) {
+    int currentIndex = 1000;          // Starting Index :contentReference[oaicite:1]{index=1}
+    if (key.empty() || currentIndex < 0 || currentIndex >= data_size) return;
 
-    int currentIndex = 1000;
+    std::size_t kpos = 0;
+    const std::size_t klen = key.size();
 
-    // TODO: Implement the solve_steganography function.
-    /**
-     * Implement a loop to decrypt the message, starting from index 1000.
-     *
-     * Every character is just a number (its ASCII code).
-     * Type casting allows you to switch between these two views.
-     *
-     * - To get a number from a character: (int)key_char
-     *   Example: (int)'A' results in the integer 65.
-     * - To get a character from a number: (char)secret_value
-     *   Example: (char)65 results in the character 'A'.
-     *
-     * The decryption process is as follows:
-     * - Use the ASCII value of the repeating `key` characters to determine the jump distance.
-     *   (Hint: use the modulo '%' operator).
-     * - Update your current index with the jump distance, then read the value from `image_data`.
-     *   Remember to always stay within the array bounds!
-     * - If the value is 0, stop the loop. Otherwise, cast the value to a `char` and print it.
-     */
+    while (true) {
+        // 1) jump first by ASCII(key[kpos])
+        unsigned char step = static_cast<unsigned char>(key[kpos]);
+        if (step == 0) break; // avoid infinite loop if key contains '\0'
+        currentIndex += static_cast<int>(step);
 
+        // 2) bounds check after jump
+        if (currentIndex < 0 || currentIndex >= data_size) break;
+
+        // 3) read value at the new index
+        int v = image_data[currentIndex];
+        if (v == 0) break;  // stop on null terminator
+
+        // 4) output the decoded char
+        std::cout << static_cast<char>(v);
+
+        // 5) advance key (cyclic)
+        kpos = (kpos + 1) % klen;
+    }
 }
+
 
 
 // DO NOT EDIT THE MAIN FUNCTION
